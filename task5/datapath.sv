@@ -13,5 +13,43 @@ module datapath(input slow_clock, input fast_clock, input resetb,
 //
 // Follow the block diagram in the Lab 1 handout closely as you write this code.
 
+wire[3:0] new_card;
+wire[3:0] pcard1_out, pcard2_out, dcard1_out, dcard2_out, dcard3_out;
+
+//dealcard module
+dealcard dc(.clock(fast_clock), .resetb(resetb), .new_card(new_card));
+
+//reg4 registers
+reg4 PCard1(.new_card(new_card), .load_card(load_pcard1), .resetb(resetb), .slow_clock(slow_clock), .card_out(pcard1_out));
+reg4 PCard2(.new_card(new_card), .load_card(load_pcard2), .resetb(resetb), .slow_clock(slow_clock), .card_out(pcard2_out));
+reg4 PCard3(.new_card(new_card), .load_card(load_pcard3), .resetb(resetb), .slow_clock(slow_clock), .card_out(pcard3_out));
+
+reg4 DCard1(.new_card(new_card), .load_card(load_dcard1), .resetb(resetb), .slow_clock(slow_clock), .card_out(dcard1_out));
+reg4 DCard2(.new_card(new_card), .load_card(load_dcard2), .resetb(resetb), .slow_clock(slow_clock), .card_out(dcard2_out));
+reg4 DCard3(.new_card(new_card), .load_card(load_dcard3), .resetb(resetb), .slow_clock(slow_clock), .card_out(dcard3_out));
+
+//card7seg
+card7seg p1(.card(pcard1_out), .seg7(HEX0));
+card7seg p2(.card(pcard2_out), .seg7(HEX1));
+card7seg p3(.card(pcard3_out), .seg7(HEX2));
+
+card7seg d1(.card(dcard1_out), .seg7(HEX3));
+card7seg d2(.card(dcard2_out), .seg7(HEX4));
+card7seg d3(.card(dcard3_out), .seg7(HEX5));
+
+//scorehand
+scorehand pscore(.card1(pcard1_out), .card2(pcard2_out), .card3(pcard3_out), .total(pscore_out));
+scorehand dscore(.card1(dcard1_out), .card2(dcard2_out), .card3(dcard3_out), .total(dscore_out));
 endmodule
 
+module reg4(input[3:0] new_card, input load_card, input resetb, input slow_clock, output reg[3:0] card_out);
+
+always @(negedge slow_clock or negedge resetb) begin
+ if(resetb == 1'b0) begin
+    card_out <= 1'b0;
+ end else begin
+    card_out <= new_card;
+ end
+ end
+ 
+ endmodule
