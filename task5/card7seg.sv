@@ -1,5 +1,5 @@
 module card7seg(input [3:0] card, output reg[6:0] seg7);
-always @(*) begin
+always_comb begin
 case (card)
 				4'b0000: seg7 = 7'b1111111;
 				4'b0001: seg7 = 7'b0001000;

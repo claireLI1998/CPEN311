@@ -22,7 +22,7 @@ state6 = 4'b0110,
 state7 = 4'b0111,
 finish = 4'b1000;
 
-always @(negedge slow_clock or negedge resetb)begin
+always_ff @(negedge slow_clock or negedge resetb)begin
 
 if(slow_clock == 1'b0) begin
 state <= next_state;
@@ -34,7 +34,7 @@ end
 
 end
 
-always @(*) begin
+always_comb begin
 
 case(state)
   state1: next_state = state2;
@@ -60,7 +60,7 @@ case(state)
 endcase
 end
 
-always@(*) begin
+always_comb begin
 {player_win_light, dealer_win_light} = 2'b00;
 case(state)
 state1: loadcards = 6'b000001;//pcard1

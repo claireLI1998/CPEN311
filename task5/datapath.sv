@@ -44,7 +44,7 @@ endmodule
 
 module reg4(input[3:0] new_card, input load_card, input resetb, input slow_clock, output reg[3:0] card_out);
 
-always @(negedge slow_clock or negedge resetb) begin
+always_ff @(negedge slow_clock or negedge resetb) begin
  if(resetb == 1'b0) begin
     card_out <= 1'b0;
  end else begin
