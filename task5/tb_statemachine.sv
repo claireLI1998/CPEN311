@@ -31,7 +31,7 @@ pscore = 5;#10;
 dscore = 4;#10;
 pscore = 8;#10;
 dscore = 9;#20;
-assert(dealer_win_light == 1'b1) begin
+assert(dealer_win_light == 1'b1 && player_win_light == 1'b0) begin
  $display("Test passed");
 end else begin
  $display("Test failed");
@@ -47,7 +47,7 @@ pscore = 14;#10;
 dscore = 2;#10;
 pscore = 8;#10;
 dscore = 3;#10;
-assert(player_win_light == 1'b1) begin
+assert(player_win_light == 1'b1 && dealer_win_light == 1'b0) begin
  $display("Test passed");
 end else begin
  $display("Test failed");
@@ -65,7 +65,7 @@ pscore = 7;#10;
 dscore = 2;#10;
 pscore = 7;#10;
 dscore = 8;#10;
-assert(dealer_win_light == 1'b1) begin
+assert(dealer_win_light == 1'b1 && player_win_light = 1'b0) begin
  $display("Test passed");
 end else begin
  $display("Test failed");
