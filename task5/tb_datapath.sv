@@ -1,90 +1,142 @@
 module tb_datapath();
 
-reg slow_clock, fast_clock, resetb;
-reg load_pcard1, load_pcard2, load_pcard3;
-reg load_dcard1, load_dcard2, load_dcard3;
-wire[3:0] pscore_out, dscore_out;
-wire[6:0] HEX5, HEX4, HEX3, HEX2, HEX1, HEX0;
-wire[3:0] pcard3_out;
-wire[41:0] display;
- 
-datapath dp(.*);
+logic fast_clock, slow_clock, resetb;
+logic load_pcard1, load_pcard2, load_pcard3;
+logic load_dcard1, load_dcard2, load_dcard3;
+logic [3:0] pscore_out, dscore_out;
+logic [3:0] pcard3_out;
+logic [6:0] HEX0, HEX1, HEX2, HEX3, HEX4, HEX5;
 
-initial begin 
-   fast_clock = 1'b0; 
-   forever #10 fast_clock = ~fast_clock;
-end
-
-initial begin 
-   slow_clock = 1'b0;
-   forever #50 slow_clock = ~slow_clock;
-end
-
-assign HEXset = {HEX0, HEX1, HEX2, HEX3, HEX4, HEX5};
+datapath dut(.*);
 
 initial begin
-resetb = 1'b0;
-load_pcard1 = 1'b0;
-load_pcard2 = 1'b0;
-load_pcard3 = 1'b0;
-load_dcard1 = 1'b0;
-load_dcard2 = 1'b0;
-load_dcard3 = 1'b0;
+slow_clock = 1'b1;#5;
+forever begin
+slow_clock = 1'b0;#5;
+slow_clock = 1'b1;#5;
+end
+end
 
-#10;
-
+initial begin
 resetb = 1'b1;
+slow_clock = 1'b0;
+load_pcard1 = 0;
+load_pcard2 = 0;
+load_pcard3 = 0;
+load_dcard1 = 0;
+load_dcard2 = 0;
+load_dcard3 = 0;
+#5;
+resetb = 0;
+#5;
+slow_clock = 1'b1;
+#5;
+resetb = 1;
+//p1
+#5;
+slow_clock = 0;
+#5;
+load_pcard1 = 1;
+slow_clock = 1;
+//d1
+#5;
+slow_clock = 0;
+#5;
+load_pcard1 = 0;
+load_dcard1 = 1;
+slow_clock = 1;
+//p2
+#5;
+slow_clock = 0;
+#5;
+load_pcard2 = 1;
+load_dcard1 = 0;
+slow_clock = 1;
+//d2
+#5;
+slow_clock = 0;
+#5;
+load_pcard2 = 0;
+load_dcard2 = 1;
+slow_clock = 1;
+//done
+#5;
+slow_clock = 0;
+#5;
+load_pcard2 = 0;
+load_dcard2 = 0;
+slow_clock = 1;
+#20;
 
-{load_pcard1, load_pcard2, load_pcard3, load_dcard1, load_dcard2, load_dcard3} = 6'b100000;
-#100;
-assert(HEX0 != 7'b1111111)begin
-   $display("HEX Test passed");
-end else begin
-   $display("HEX Test failed");
-end 
 
-{load_pcard1, load_pcard2, load_pcard3, load_dcard1, load_dcard2, load_dcard3} = 6'b010000;
-#100;
-assert(HEX1 != 7'b1111111)begin
-   $display("HEX Test passed");
-end else begin
-   $display("HEX Test failed");
-end 
 
-{load_pcard1, load_pcard2, load_pcard3, load_dcard1, load_dcard2, load_dcard3} = 6'b001000;
-#100;
-assert(HEX2 != 7'b1111111)begin
-   $display("HEX Test passed");
-end else begin
-   $display("HEX Test failed");
-end 
+//test2
+resetb = 1'b1;
+slow_clock = 1'b0;
+load_pcard1 = 0;
+load_pcard2 = 0;
+load_pcard3 = 0;
+load_dcard1 = 0;
+load_dcard2 = 0;
+load_dcard3 = 0;
+#5;
+resetb = 0;
+#5;
+slow_clock = 1'b1;
+#5;
+resetb = 1;
+//p1 9
+#8;
+slow_clock = 0;
+#8;
+load_pcard1 = 1;
+slow_clock = 1;
+//d1 12
+#3;
+slow_clock = 0;
+#3;
+load_pcard1 = 0;
+load_dcard1 = 1;
+slow_clock = 1;
+//p2 2
+#3;
+slow_clock = 0;
+#3;
+load_pcard2 = 1;
+load_dcard1 = 0;
+slow_clock = 1;
+//d2 10
+#8;
+slow_clock = 0;
+#8;
+load_pcard2 = 0;
+load_dcard2 = 1;
+slow_clock = 1;
+//p3 3
+#6;
+slow_clock = 0;
+#6;
+load_pcard3 = 1;
+load_dcard2 = 0;
+slow_clock = 1;
+//d3 6
+#3;
+slow_clock = 0;
+#3;
+load_pcard3 = 0;
+load_dcard3 = 1;
+slow_clock = 1;
+//done
+#5;
+slow_clock = 0;
+#5;
+load_pcard3 = 0;
+load_dcard3 = 0;
+slow_clock = 1;
+#20;
 
-{load_pcard1, load_pcard2, load_pcard3, load_dcard1, load_dcard2, load_dcard3} = 6'b000100;
-#100;
-assert(HEX3 != 7'b1111111)begin
-   $display("HEX Test passed");
-end else begin
-   $display("HEX Test failed");
-end 
 
-{load_pcard1, load_pcard2, load_pcard3, load_dcard1, load_dcard2, load_dcard3} = 6'b000010;
-#100;
-assert(HEX4 != 7'b1111111)begin
-   $display("HEX Test passed");
-end else begin
-   $display("HEX Test failed");
-end 
 
-{load_pcard1, load_pcard2, load_pcard3, load_dcard1, load_dcard2, load_dcard3} = 6'b000001;
-#100;
-assert(HEX5 != 7'b1111111)begin
-   $display("HEX Test passed");
-end else begin
-   $display("HEX Test failed");
-end 
-
-resetb = 1'b0;
-#100;
 $stop;
 end
 

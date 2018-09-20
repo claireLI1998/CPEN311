@@ -1,4 +1,4 @@
-module card7seg(input [3:0] card, output reg[6:0] HEX0);
+module card7seg(input [3:0] SW, output reg[6:0] HEX0);
 always @(*) begin
 case (SW)
 				4'b0000: HEX0 = 7'b1111111;

@@ -5,8 +5,8 @@ module datapath(input slow_clock, input fast_clock, input resetb,
                 output [3:0] pscore_out, output [3:0] dscore_out,
                 output[6:0] HEX5, output[6:0] HEX4, output[6:0] HEX3,
                 output[6:0] HEX2, output[6:0] HEX1, output[6:0] HEX0);
-						
-// The code describing your datapath will go here.  Your datapath 
+
+// The code describing your datapath will go here.  Your datapath
 // will hierarchically instantiate six card7seg blocks, two scorehand
 // blocks, and a dealcard block.  The registers may either be instatiated
 // or included as sequential always blocks directly in this file.
@@ -46,10 +46,10 @@ module reg4(input[3:0] new_card, input load_card, input resetb, input slow_clock
 
 always_ff @(negedge slow_clock or negedge resetb) begin
  if(resetb == 1'b0) begin
-    card_out <= 1'b0;
- end else begin
+    card_out <= 3'b000;
+ end else if(load_card == 1'b1) begin
     card_out <= new_card;
  end
  end
- 
+
  endmodule

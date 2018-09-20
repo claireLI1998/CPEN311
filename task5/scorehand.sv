@@ -25,7 +25,7 @@ always@(*) begin
     c3=card3;
   end
 
-  total <= (c1 + c2 + c3) % 10;
+  total = (c1 + c2 + c3) % 10;
 
   end
 
