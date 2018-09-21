@@ -13,10 +13,10 @@ logic[3:0] dscore, pscore, pcard3;
 statemachine dut(.*);
 
 initial begin
-slow_clock = 1'b0;#5;
-forever begin
 slow_clock = 1'b1;#5;
+forever begin
 slow_clock = 1'b0;#5;
+slow_clock = 1'b1;#5;
 end
 end
 
@@ -26,6 +26,7 @@ initial begin
 pscore = 1'b0;
 dscore = 1'b0;
 pcard3 = 1'b0;
+resetb = 1'b0;#10;
 resetb = 1'b1;
 pscore = 5;#10;
 dscore = 4;#10;
@@ -46,7 +47,7 @@ resetb = 1'b1;
 pscore = 14;#10;
 dscore = 2;#10;
 pscore = 8;#10;
-dscore = 3;#10;
+dscore = 3;#20;
 assert(player_win_light == 1'b1 && dealer_win_light == 1'b0) begin
  $display("Test passed");
 end else begin
@@ -64,8 +65,8 @@ dscore = 2;#10;
 pscore = 7;#10;
 dscore = 2;#10;
 pscore = 7;#10;
-dscore = 8;#10;
-assert(dealer_win_light == 1'b1 && player_win_light = 1'b0) begin
+dscore = 8;#20;
+assert(dealer_win_light == 1'b1 && player_win_light == 1'b0) begin
  $display("Test passed");
 end else begin
  $display("Test failed");
@@ -81,6 +82,8 @@ pscore = 3;#10;
 dscore = 9;#10;
 pscore = 5;#10;
 dscore = 5;#10;
+pscore = 2;#10;
+dscore = 2;#20;
 assert(player_win_light == 1'b1 && dealer_win_light == 1'b1) begin
  $display("Test passed");
 end else begin

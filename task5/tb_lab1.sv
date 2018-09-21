@@ -14,18 +14,18 @@ wire[6:0] HEX0, HEX1, HEX2, HEX3, HEX4, HEX5;
 lab1 dut(.*);
 
 initial begin
-CLOCK_50 = 1'b0; #10;
-forever begin
 CLOCK_50 = 1'b1; #10;
+forever begin
 CLOCK_50 = 1'b0; #10;
+CLOCK_50 = 1'b1; #10;
 end
 end
 
 initial begin
-KEY[0] = 1'b0; #20;
-forever begin
 KEY[0] = 1'b1; #20;
+forever begin
 KEY[0] = 1'b0; #20;
+KEY[0] = 1'b1; #20;
 end
 end
 
@@ -34,11 +34,19 @@ KEY[1] = 1'b0;
 KEY[2] = 1'b0;
 
 KEY[3] = 1'b0;
-#10;
+#40;
 KEY[3] = 1'b1;
-#1000;
+#300;
 KEY[3] = 1'b0;
 #10;
+
+KEY[3] = 1'b0;
+#40;
+KEY[3] = 1'b1;
+#300;
+KEY[3] = 1'b0;
+#10;
+
 $stop;
 end
 
