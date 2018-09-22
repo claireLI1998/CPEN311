@@ -5,11 +5,12 @@ module tb_card7seg();
 // 10,000 ticks (equivalent to "initial #10000 $finish();").
 
 
-reg clk;
+logic clk;
 logic [3:0] SW;
 logic [6:0] HEX0;
 
 card7seg dut(.*);
+
 initial begin
 clk = 1'b1;#140;
 clk = 1'b0;
@@ -36,7 +37,7 @@ SW = 4'b0101;#10;
 assert(HEX0===7'b0010010);
 
 SW = 4'b0110;#10;
-assert(HEX0===7'b1000000);
+assert(HEX0===7'b0000010);
 
 SW = 4'b0111;#10;
 assert(HEX0===7'b1111000);
