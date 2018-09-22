@@ -19,14 +19,6 @@ end
 end
 
 initial begin
-fast_clock = 1'b0;#3;
-forever begin
-fast_clock = 1'b1;#3;
-fast_clock = 1'b0;#3;
-end
-end
-
-initial begin
 
 resetb = 1'b0;
 {load_dcard3, load_dcard2, load_dcard1, load_pcard3, load_pcard2, load_pcard1} = 6'b000000;
