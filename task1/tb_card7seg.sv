@@ -59,5 +59,7 @@ assert(HEX0===7'b0011000);
 SW = 4'b1101;#10;
 assert(HEX0===7'b0001001);
 $display("Test passed");
+
+
 end
 endmodule
