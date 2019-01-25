@@ -1,0 +1,129 @@
+module flash_reader(input logic CLOCK_50, input logic [3:0] KEY, input logic [9:0] SW,
+                    output logic [6:0] HEX0, output logic [6:0] HEX1, output logic [6:0] HEX2,
+                    output logic [6:0] HEX3, output logic [6:0] HEX4, output logic [6:0] HEX5,
+                    output logic [9:0] LEDR);
+
+// You may use the SW/HEX/LEDR ports for debugging. DO NOT delete or rename any ports or signals.
+parameter 
+init = 3'b000,
+request = 3'b001,
+getdata = 3'b010,
+readhigherbit = 3'b011,
+iterate = 3'b100,
+done = 3'b101;
+
+
+logic [2:0] state;
+logic clk, rst_n;
+
+assign clk = CLOCK_50;
+assign rst_n = KEY[3];
+
+logic flash_mem_read, flash_mem_waitrequest, flash_mem_readdatavalid;
+logic [22:0] flash_mem_address;
+logic [31:0] flash_mem_readdata;
+logic [3:0] flash_mem_byteenable;
+
+logic [7:0] addr;
+logic [15:0] data, q;
+logic wren;
+
+logic [31:0] rddata;
+logic [7:0] temp;
+
+flash flash_inst(.clk_clk(clk), .reset_reset_n(rst_n), .flash_mem_write(1'b0), .flash_mem_burstcount(7'b1),
+                 .flash_mem_waitrequest(flash_mem_waitrequest), .flash_mem_read(flash_mem_read), .flash_mem_address(flash_mem_address),
+                 .flash_mem_readdata(flash_mem_readdata), .flash_mem_readdatavalid(flash_mem_readdatavalid), .flash_mem_byteenable(flash_mem_byteenable), .flash_mem_writedata());
+
+s_mem samples(.address(addr),
+			  .data(data),
+			  .wren(wren),
+			  .clock(clk),
+			  .q(q));
+
+assign flash_mem_byteenable = 4'b1111;
+
+// the rest of your code goes here.  don't forget to instantiate the on-chip memory
+always @(posedge clk or negedge rst_n) begin
+
+ if(!rst_n) begin
+  temp = 6'b0;
+  wren = 1'b0;
+  flash_mem_read = 1'b0;
+  flash_mem_address = 23'b0;
+  addr = 8'b0;
+  state <= init;
+ end else begin
+  case(state)
+   init: 
+   begin
+    temp = 6'b0;
+    wren = 1'b0;
+	flash_mem_read = 1'b0;
+	flash_mem_address = 23'b0;
+	addr = 8'b0;
+	state <= request;
+   end
+		 
+   request: 
+   begin
+    flash_mem_read = 1'b1;
+	if(flash_mem_waitrequest == 1'b1) begin
+	 flash_mem_read = 1'b1;
+	 state <= request;
+	end else begin
+	 state <= getdata;
+	end 
+   end
+   
+   getdata:
+   begin
+    if(flash_mem_readdatavalid == 1'b1) begin
+	 flash_mem_read = 1'b0;
+	 rddata = flash_mem_readdata;
+	 data = rddata[15:0];
+	 wren = 1'b1;
+	 state <= readhigherbit;
+	end else begin
+	 state <= getdata;
+	end
+   end 
+   
+   readhigherbit:
+   begin
+    data = rddata[31:16];
+	wren = 1'b1;
+	addr = addr + 1;
+	state <= iterate;
+   end
+   
+   iterate:
+   begin
+    temp = temp + 1;
+	wren = 1'b0;
+    if(temp < 128) begin
+	 flash_mem_address = flash_mem_address + 1'b1;
+	 addr = addr + 1;
+	 state <= request;
+	end else begin
+	 state <= done;
+	end
+   end
+   
+   done: 
+   begin
+    wren = 1'b0;
+	flash_mem_read = 1'b0;
+	state <= done;
+   end
+   
+   default: state <= done;
+  endcase
+  
+ end
+ end
+	
+	
+endmodule: flash_reader
+
+

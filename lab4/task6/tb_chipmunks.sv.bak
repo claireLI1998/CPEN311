@@ -1,0 +1,165 @@
+`timescale 1ps / 1ps
+module tb_chipmunks();
+
+// Your testbench goes here.
+logic CLOCK_50, CLOCK2_50; logic [3:0] KEY; logic [9:0] SW;
+logic AUD_DACLRCK, AUD_ADCLRCK, AUD_BCLK, AUD_ADCDAT;
+wire FPGA_I2C_SDAT;
+wire FPGA_I2C_SCLK;
+logic AUD_DACDAT,AUD_XCK;
+logic [6:0] HEX0,HEX1,HEX2,HEX3,HEX4,HEX5;
+logic [9:0] LEDR;
+
+parameter
+init = 4'b0000,
+request = 4'b0001,
+read_data_valid = 4'b0010,
+wait_for_ready_low = 4'b0011,
+get_music_bit_low = 4'b0100,
+repeat_wait_low = 4'b0101,
+repeat_music_low = 4'b0110,
+repeat_wait_high = 4'b0111,
+repeat_music_high = 4'b1000,
+wait_for_ready_high = 4'b1001,
+get_music_bit_high = 4'b1010,
+iterate = 4'b1011;
+
+chipmunks dut(.*);
+
+initial begin
+    CLOCK_50 = 1'b0;
+    forever #5 CLOCK_50 = ~CLOCK_50;
+end
+
+initial begin
+
+KEY[3] = 1'b1;#5;
+KEY[3] = 1'b0;#5;
+KEY[3] = 1'b1;#1;
+
+
+#40000;
+$stop;
+end
+endmodule: tb_chipmunks
+
+// Any other simulation-only modules you need
+module clock_generator (input logic CLOCK2_50, input logic reset, output logic AUD_XCK);
+
+endmodule: clock_generator
+
+module audio_and_video_config (input logic CLOCK_50, input logic reset, wire I2C_SDAT, output logic I2C_SCLK); 
+
+endmodule: audio_and_video_config
+
+module audio_codec (input logic CLOCK_50, input logic reset, input logic read_s, 
+					input logic write_s, input logic [15:0] writedata_left, 
+					input logic [15:0] writedata_right, input logic AUD_ADCDAT, 
+					input logic AUD_BCLK, input logic AUD_ADCLRCK, input logic AUD_DACLRCK,
+					output logic read_ready, write_ready, output logic [15:0] readdata_left,
+					output logic [15:0] readdata_right, 
+					output logic AUD_DACDAT);
+
+always@(posedge CLOCK_50 or posedge reset) begin
+ if(reset == 1'b1) begin
+   write_ready = 1'b0;   
+ end else begin
+  if(write_s == 1'b1) begin
+   write_ready = 1'b0;
+  end else begin
+   write_ready = 1'b1;
+  end 
+end
+end
+
+
+endmodule: audio_codec
+
+module flash(input logic clk_clk, input logic reset_reset_n,
+             input logic flash_mem_write, input logic [6:0] flash_mem_burstcount,
+             output logic flash_mem_waitrequest, input logic flash_mem_read,
+             input logic [22:0] flash_mem_address, output logic [31:0] flash_mem_readdata,
+             output logic flash_mem_readdatavalid, input logic [3:0] flash_mem_byteenable,
+             input logic [31:0] flash_mem_writedata);
+parameter
+start = 3'b000,
+one_cycle = 3'b001,
+send_valid = 3'b010,
+wait_accepted = 3'b011,
+wait_1 = 3'b100,
+finish = 3'b101;
+
+
+logic [1:0] state;
+logic [31:0] dataout;
+
+always @(posedge clk_clk or negedge reset_reset_n) begin
+ if(!reset_reset_n) begin
+  flash_mem_waitrequest = 1'b0;
+  flash_mem_readdatavalid = 1'b0;
+  dataout = 32'b0;
+  state <= start;
+ end else begin
+  case(state)
+  
+  start:
+  begin
+   flash_mem_readdatavalid = 1'b0;
+   if(flash_mem_read == 1'b1) begin
+    flash_mem_waitrequest = 1'b1;
+	state <= one_cycle;
+   end else begin
+    flash_mem_waitrequest = 1'b0;
+	state <= start;
+   end 
+  end
+  
+  one_cycle: //waitrequest signal is set high and wait for one more cycle
+  begin
+   flash_mem_waitrequest = 1'b1;
+   dataout = {9'b10, flash_mem_address};
+   state <= send_valid;
+  end
+  
+  send_valid:
+  begin
+   flash_mem_waitrequest = 1'b0;
+   if(dataout != 32'b0) begin
+    flash_mem_readdatavalid = 1'b1;
+	flash_mem_readdata = dataout;
+	state <= wait_accepted;
+   end else begin
+    flash_mem_readdatavalid = 1'b0;
+	state <= send_valid;
+   end
+  end
+  
+  wait_accepted:
+  begin
+    flash_mem_readdatavalid = 1'b0;
+    state = wait_1;
+  end
+  
+  wait_1:
+  begin
+   state = finish;
+  end 
+  
+  finish:
+  begin
+   state <= start;
+  end 
+  
+  default: 
+  begin
+   flash_mem_waitrequest = 1'b0;
+   flash_mem_readdatavalid = 1'b0;
+  end
+
+endcase
+
+end
+ 
+end
+
+endmodule: flash
