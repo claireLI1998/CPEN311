@@ -1,0 +1,61 @@
+module task3(input logic CLOCK_50, input logic [3:0] KEY, // KEY[3] is async active-low reset
+             input logic [9:0] SW, output logic [9:0] LEDR,
+             output logic [6:0] HEX0, output logic [6:0] HEX1, output logic [6:0] HEX2,
+             output logic [6:0] HEX3, output logic [6:0] HEX4, output logic [6:0] HEX5,
+             output logic [7:0] VGA_R, output logic [7:0] VGA_G, output logic [7:0] VGA_B,
+             output logic VGA_HS, output logic VGA_VS, output logic VGA_CLK);
+
+    // instantiate and connect the VGA adapter and your module
+    wire [2:0] vga_colour;
+    wire [7:0] vga_x;
+    wire [6:0] vga_y;
+    wire vga_plot;
+	logic [9:0] VGA_R_10;
+    logic [9:0] VGA_G_10;
+    logic [9:0] VGA_B_10;
+    logic VGA_BLANK, VGA_SYNC;
+	logic start, fsstart;
+    logic done, fsdone;
+    logic [2:0] colour, clear;
+	logic [7:0] centre_x;
+	logic [6:0] centre_y;
+	logic [7:0] radius;
+	
+	assign colour = 3'b010;
+	assign clear = 3'b000;
+	assign radius = 40;
+	assign centre_x = 80;
+	assign centre_y = 60;
+	
+	assign VGA_R = VGA_R_10[9:2];
+    assign VGA_G = VGA_G_10[9:2];
+    assign VGA_B = VGA_B_10[9:2];
+	
+	circle c(.clk(CLOCK_50), .rst_n(KEY[3]), .colour(colour),
+              .centre_x(centre_x), .centre_y(centre_y), .radius(radius),
+              .start(start), .done(done),
+              .vga_x(vga_x), .vga_y(vga_y),
+              .vga_colour(vga_colour), .vga_plot(vga_plot));
+	
+	fillscreen fs(.clk(clk), .rst_n(rst_n), .colour(clear),
+                  .start(fsstart), .done(fsdone),
+                  .vga_x(vga_x), .vga_y(vga_y),
+                  .vga_colour(vga_colour), .vga_plot(vga_plot));
+				  
+	vga_adapter #(.RESOLUTION("160x120")) vga_u0(.resetn(KEY[3]), .clock(CLOCK_50), .colour(vga_colour),
+                                                .x(vga_x), .y(vga_y), .plot(vga_plot), .VGA_R(VGA_R_10), .VGA_G(VGA_G_10), .VGA_B(VGA_B_10), .*);
+	always_ff @(posedge CLOCK_50) begin
+	 if(KEY[3] == 1'b0) begin
+	  fsstart = 1'b1;
+	  start = 1'b0;
+	 end else if(KEY[3] == 1'b1 && done == 1'b1) begin
+	  start = 1'b0;
+	 end else if(KEY[3] == 1'b1 && fsdone == 1'b1)begin
+	  fsstart = 1'b0;
+	  start = 1'b1;
+	 end else begin 
+          start = 1'b1;
+         end
+	end
+
+endmodule: task3
