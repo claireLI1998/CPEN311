@@ -1,0 +1,48 @@
+module task3(input logic CLOCK_50, input logic [3:0] KEY, input logic [9:0] SW,
+             output logic [6:0] HEX0, output logic [6:0] HEX1, output logic [6:0] HEX2,
+             output logic [6:0] HEX3, output logic [6:0] HEX4, output logic [6:0] HEX5,
+             output logic [9:0] LEDR);
+
+    // your code here
+    logic [7:0] ctaddr, ptaddr;
+	logic [7:0] ctdata, ptdata, ptrddata, ctq, ptq;
+	logic wtwren, ptwren;
+	logic protocol, aen, ardy;
+    ct_mem ct(.address(ctaddr),
+	          .clock(CLOCK_50),
+			  .data(ctdata),
+			  .wren(ctwren),
+			  .q(ctq));
+    pt_mem pt(.address(ptaddr),
+	          .clock(CLOCK_50),
+			  .data(ptdata),
+			  .wren(ptwren),
+			  .q(ptq));
+    arc4 a4(.clk(CLOCK_50),
+            .rst_n(KEY[3]),
+   			.en(aen),
+			.rdy(ardy),
+			.key({14'b0, SW[9:0]}),
+            .ct_addr(ctaddr),
+			.ct_rddata(ctq),
+			.pt_addr(ptaddr),
+			.pt_rddata(ptrddata),
+			.pt_wrdata(ptq),
+			.pt_wren(ptwren));
+    // your code here
+	
+	always_ff @(posedge CLOCK_50) begin
+	
+	 if(KEY[3] == 1'b0) begin
+	  aen = 1'b0;
+	  protocol = 1'b1;
+	 end else if(ardy == 1'b1 && protocol == 1'b1) begin
+	  aen = 1'b1;
+	  protocol = 1'b0;
+	 end else begin
+	  aen = 1'b0;
+	 end
+	 
+	end
+    
+endmodule: task3
